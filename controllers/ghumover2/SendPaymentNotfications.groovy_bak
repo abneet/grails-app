@@ -1,0 +1,67 @@
+package ghumover2
+
+import grails.converters.JSON
+import grails.plugin.springsecurity.SpringSecurityService;
+import grails.plugins.rest.client.RestBuilder
+
+import org.joda.time.DateTime
+
+import java.text.SimpleDateFormat
+
+import javax.mail.Session;
+
+class SendPaymentNotifications {
+
+	static allowedMethods = [saveAttendance	: "POST"]
+	def index() {}
+
+def taglist=[]
+	def sendPaymentNotification(String interval)
+     {
+		  
+		 def std=Student.findByFeeType(interval);
+		 std.each {
+			tags.addAll( it.getTags())
+		 }
+		 testNotification("Fee date")
+	 }
+	 SpringSecurityService springSecurityService
+
+	
+	 def testNotification(String msg1){
+		 
+		  
+		  def rest = new RestBuilder()
+		  def resp = rest.post("https://api.pushbots.com/push/all"){
+			  header 'x-pushbots-appid', '550e9e371d0ab1de488b4569'
+			  header 'x-pushbots-secret', 'e68461d7755b0d3733b4b36717aea77d'
+	  json {
+			sound = "ding"
+		   platform = ["0", "1"]
+		  alias= ""
+	  tags= tagList
+	  msg= msg1
+	  except_active= []
+	   except_tags= []
+		badge= "187192"
+	  payload={
+		  msg="payment"
+	  }
+  
+		  
+	  active= []
+	  }
+		
+	  }
+		  
+		  
+			 System.out.print("resp val : "+resp.json)
+		 }
+	
+
+
+
+
+
+
+}

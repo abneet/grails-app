@@ -1,0 +1,60 @@
+package ghumover2
+import grails.rest.Resource
+
+import javax.persistence.Transient
+
+@Resource(formats=['json', 'xml'])
+class Teacher  extends User  {
+
+	 static belongsTo = [Grade , Department]
+	 static hasMany = [grades:Grade,subject:Subject , timetables:TimeTable,departments:Department]
+
+	 Long teacherId
+	 String teacherName
+	 String teacherPhoto
+	 String teacherEmailId
+	 String phoneNo
+	 long school_id
+	 static mapping = {
+		  id generator: 'increment',name: 'teacherId'
+		  
+	}
+
+	static constraints = {
+		school_id(nullable: true)
+		phoneNo(nullable: true)
+		teacherEmailId(nullable: true)
+		teacherPhoto(nullable: true)
+
+	}
+
+
+	void addToGradeSubject(Grade grade , Subject subject)
+    {
+
+
+		new GradeTeacherSubject(grade: grade, teacher: this , subject:subject).save()
+		this.addToGrades(grade).save()
+		grade.addToTeachers(this).save()
+		this.addToSubject(subject).save()
+
+    }
+	void removeFromGradeSubject(Grade grade , Subject subject)
+	{
+		GradeTeacherSubject.findByGradeAndTeacherAndSubject(grade,this,subject).delete()
+	}
+
+	def getSubjectsInGrade(grade)
+	{
+		return GradeTeacherSubject.findAllByGradeAndTeacher(grade,this)
+	}
+
+
+	def getAllGradesAndSubjects()
+	{
+		return GradeTeacherSubject.findAll("from GradeTeacherSubject as g where g.teacher = ? ",[this])
+	}
+
+
+
+}
